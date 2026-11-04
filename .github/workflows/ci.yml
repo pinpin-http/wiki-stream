@@ -1,0 +1,39 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      MPLBACKEND: Agg
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.lock
+
+      - name: Dépendances épinglées
+        run: |
+          python -m pip install -r requirements.lock
+          python -m pip install --no-deps -e .
+
+      - name: Tests (sans réseau, sur la fixture)
+        run: python -m pytest -q
+
+      - name: Pipeline hors ligne sur la fixture (broker fichier)
+        run: |
+          python -m wikistream --broker file --data "$RUNNER_TEMP/ci" replay tests/fixtures/recentchange_sample.jsonl
+          python -m wikistream --broker file --data "$RUNNER_TEMP/ci" process --idle-exit 2
+          python -m wikistream --broker file --data "$RUNNER_TEMP/ci" report --docs "$RUNNER_TEMP/ci/docs"
+          python -m wikistream --broker file --data "$RUNNER_TEMP/ci" sql "select count(*) - count(distinct id) as doublons from rc"
