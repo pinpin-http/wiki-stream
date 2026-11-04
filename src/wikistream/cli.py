@@ -207,6 +207,57 @@ def cmd_sql(args) -> int:
     return 0
 
 
+def cmd_verify(args) -> int:
+    """Relit tout le topic (groupe jetable) et compare ses identifiants à ceux du lac."""
+    import collections
+
+    import duckdb
+
+    from .events import decode
+    from .sink import lake_glob
+
+    s = _settings(args)
+    ids: collections.Counter[str] = collections.Counter()
+    if s.broker == "kafka":
+        import uuid
+
+        from confluent_kafka import Consumer, TopicPartition
+
+        c = Consumer({"bootstrap.servers": s.bootstrap, "group.id": f"verify-{uuid.uuid4().hex}",
+                      "enable.auto.commit": False, "broker.address.family": "v4"})
+        parts = list(c.list_topics(s.topic, timeout=10).topics[s.topic].partitions)
+        ends = {p: c.get_watermark_offsets(TopicPartition(s.topic, p), timeout=10)[1] for p in parts}
+        todo = {p for p in parts if ends[p] > 0}
+        c.assign([TopicPartition(s.topic, p, 0) for p in parts])
+        while todo:
+            for m in c.consume(1000, 2.0):
+                if m.error():
+                    continue
+                ids[decode(m.value())["id"]] += 1
+                if m.offset() + 1 >= ends[m.partition()]:
+                    todo.discard(m.partition())
+        c.close()
+    else:
+        from .broker.filelog import FileLogConsumer
+
+        c = FileLogConsumer(s.broker_dir, s.topic, f"verify-{time.time_ns()}", s.partitions)
+        while batch := c.poll_batch(5000, 0):
+            for r in batch:
+                ids[decode(r.value)["id"]] += 1
+    lake = duckdb.sql(f"select id from read_parquet('{lake_glob(s.lake_dir)}')").fetchnumpy()["id"].tolist()
+    lake_set = set(lake)
+    report = {
+        "topic_messages": sum(ids.values()),
+        "topic_distinct_ids": len(ids),
+        "lake_rows": len(lake),
+        "lake_duplicates": len(lake) - len(lake_set),
+        "missing_in_lake": len(set(ids) - lake_set),
+        "extra_in_lake": len(lake_set - set(ids)),
+    }
+    print(json.dumps(report, indent=1))
+    return 0 if report["lake_duplicates"] == report["missing_in_lake"] == report["extra_in_lake"] == 0 else 1
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="wikistream", description=__doc__)
     p.add_argument("--broker", choices=["kafka", "file"], help="défaut : $WIKISTREAM_BROKER ou kafka")
@@ -243,6 +294,9 @@ def main(argv: list[str] | None = None) -> int:
     sp.add_argument("query", nargs="?", default="select count(*) from rc")
     sp.add_argument("--file")
     sp.set_defaults(func=cmd_sql)
+
+    sp = sub.add_parser("verify", help="compare le topic et le lac : ni perte ni doublon ?")
+    sp.set_defaults(func=cmd_verify)
 
     args = p.parse_args(argv)
     return args.func(args)

@@ -66,3 +66,23 @@ def test_rerun_on_same_log_is_noop(tmp_path, records):
     proc.close()
     assert summary["consumed"] == len(records) and summary["written"] == 0
     assert summary["duplicates_skipped"] == len(records)
+
+
+def test_verify_command_detects_loss(tmp_path, records, capsys):
+    from wikistream.cli import main
+
+    s = Settings(data_dir=tmp_path, broker="file")
+    prod = FileLogProducer(s.broker_dir, s.topic, s.partitions)
+    for r in records:
+        prod.produce(r["wiki"], encode(r))
+    prod.close()
+    proc = Processor(FileLogConsumer(s.broker_dir, s.topic, s.group), ParquetSink(s.lake_dir), s)
+    proc.run(idle_exit=0.3)
+    proc.close()
+    assert main(["--broker", "file", "--data", str(tmp_path), "verify"]) == 0
+    # un message arrivé dans le topic mais jamais écrit : verify doit échouer
+    prod = FileLogProducer(s.broker_dir, s.topic, s.partitions)
+    prod.produce(records[0]["wiki"], encode({**records[0], "id": "jamais-ecrit"}))
+    prod.close()
+    assert main(["--broker", "file", "--data", str(tmp_path), "verify"]) == 1
+    assert '"missing_in_lake": 1' in capsys.readouterr().out

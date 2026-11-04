@@ -40,3 +40,4 @@ jobs:
           python -m wikistream --broker file --data "$RUNNER_TEMP/ci" process --idle-exit 2
           python -m wikistream --broker file --data "$RUNNER_TEMP/ci" report --docs "$RUNNER_TEMP/ci/docs"
           python -m wikistream --broker file --data "$RUNNER_TEMP/ci" sql "select count(*) - count(distinct id) as doublons from rc"
+          python -m wikistream --broker file --data "$RUNNER_TEMP/ci" verify
