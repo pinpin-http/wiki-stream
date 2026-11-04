@@ -12,8 +12,13 @@ FIXTURE = Path(__file__).parent / "fixtures" / "recentchange_sample.jsonl"
 
 
 @pytest.fixture(autouse=True)
-def no_network(monkeypatch):
-    """Les tests tournent sans réseau : toute connexion IP échoue immédiatement."""
+def no_network(request, monkeypatch):
+    """Les tests tournent sans réseau : toute connexion IP depuis Python échoue immédiatement.
+
+    Seuls les tests marqués `kafka` (désactivés sans broker) y échappent.
+    """
+    if request.node.get_closest_marker("kafka"):
+        return
     real_connect = socket.socket.connect
 
     def guarded(self, address):
