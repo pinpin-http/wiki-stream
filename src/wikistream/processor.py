@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any
 
 from .aggregates import PageActivity, TopPages, WikiStats
-from .anomalies import Alert, PageSpikeDetector, RobustEWMADetector
+from .anomalies import Alert, PageSpikeDetector, RobustEWMADetector, label_wiki
 from .broker import Consumer
 from .config import Settings
 from .events import EDIT_TYPES, decode, page_key
@@ -243,9 +243,9 @@ class Processor:
                 a = self.wiki_detector.update(wiki, value, end - 60, end, context_ok=ok)
                 if a:
                     if r:
-                        a.details = {k: r.value[k] for k in ("edits", "bot_share", "human_users", "new_pages",
-                                                             "bytes_added", "bytes_removed", "top_pages")}
-                    a.label = "pic d'activité humaine sur le wiki"
+                        a.details = {k: r.value[k] for k in ("edits", "bot_share", "human_users", "new_pages", "bytes_added",
+                                                             "bytes_removed", "top_pages", "top_users", "top3_users_share")}
+                    a.label = label_wiki(a.details)
                     self._alert(a, now)
         lag = now - self.pipeline.watermarks.current
         if lag < 1e9:

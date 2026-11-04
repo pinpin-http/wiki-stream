@@ -19,7 +19,7 @@ class WikiAcc:
     bytes_removed: int = 0
     log_events: int = 0
     categorize: int = 0
-    users: set[str] = field(default_factory=set)
+    users: dict[str, int] = field(default_factory=dict)  # modifications humaines par compte
     pages: SpaceSaving = field(default_factory=lambda: SpaceSaving(32))
 
 
@@ -39,7 +39,8 @@ class WikiStats:
             if e.get("bot"):
                 acc.bot_edits += 1
             else:
-                acc.users.add(e.get("user") or "")
+                u = e.get("user") or ""
+                acc.users[u] = acc.users.get(u, 0) + 1
                 acc.pages.add(e["title"])
             d = size_delta(e)
             if d > 0:
@@ -54,6 +55,7 @@ class WikiStats:
 
     def result(self, acc: WikiAcc) -> dict[str, Any]:
         human = acc.edits - acc.bot_edits
+        top_users = sorted(acc.users.items(), key=lambda kv: -kv[1])[:3]
         return {
             "events": acc.events,
             "edits": acc.edits,
@@ -66,6 +68,8 @@ class WikiStats:
             "log_events": acc.log_events,
             "categorize": acc.categorize,
             "human_users": len(acc.users),
+            "top_users": [[u, n] for u, n in top_users],
+            "top3_users_share": round(sum(n for _, n in top_users) / human, 3) if human else 0.0,
             "top_pages": [[t, c] for t, c, _ in acc.pages.top(5)],
         }
 

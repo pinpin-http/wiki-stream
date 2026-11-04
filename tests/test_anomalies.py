@@ -46,6 +46,26 @@ def test_alert_on_spike_with_one_alert_per_episode():
     assert a.kind == "wiki_spike" and a.value == 150 and a.score >= 6 and 20 < a.baseline < 40
 
 
+def test_cold_start_from_partial_first_minute_is_not_an_alert():
+    """Régression observée en live : première minute incomplète (52) puis un niveau stable vers 220.
+
+    L'ancienne version partait de 52 et écrêtait les résidus : la référence mettait 30 minutes à
+    rattraper la série et la première minute « normale » après l'échauffement passait pour un pic.
+    """
+    rng = random.Random(3)
+    det = RobustEWMADetector()
+    series = [52] + [poisson(rng, 220) for _ in range(40)]
+    assert feed(det, "wikidatawiki", series) == []
+    assert 200 < det.state["wikidatawiki"].ewma < 240
+
+
+def test_wiki_label_flags_batch_tools():
+    from wikistream.anomalies import label_wiki
+
+    assert label_wiki({"top3_users_share": 0.62}).startswith("lot semi-automatique probable")
+    assert label_wiki({"top3_users_share": 0.2}) == "pic d'activité humaine sur le wiki"
+
+
 def test_warmup_suppresses_early_alerts():
     det = RobustEWMADetector(warmup=10)
     assert feed(det, "w", [5] * 5 + [200]) == []

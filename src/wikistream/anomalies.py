@@ -2,8 +2,10 @@
 
 Deux détecteurs :
 
-* `RobustEWMADetector` (niveau wiki, une valeur par minute) : prévision par
-  moyenne mobile exponentielle (EWMA), puis z-score robuste du résidu :
+* `RobustEWMADetector` (niveau wiki, une valeur par minute) : après un
+  échauffement qui fixe niveau et échelle par médiane et MAD des premières
+  valeurs, prévision par moyenne mobile exponentielle (EWMA), puis z-score
+  robuste du résidu :
       z = (x - ewma) / max(1.4826 * MAD(résidus récents), sqrt(max(ewma, 1)))
   La MAD (médiane des écarts absolus) ne se laisse pas tirer par les pics comme
   un écart-type ; le plancher de type Poisson évite les z énormes quand une
@@ -53,6 +55,7 @@ class _SeriesState:
     n: int = 1
     residuals: deque = field(default_factory=lambda: deque(maxlen=30))
     in_alert: bool = False
+    warm: list = field(default_factory=list)  # valeurs de la période d'échauffement
 
 
 class RobustEWMADetector:
@@ -90,24 +93,34 @@ class RobustEWMADetector:
         """`context_ok=False` interdit l'alerte (ex. un seul contributeur) sans fausser l'état."""
         st = self.state.get(key)
         if st is None:
-            self.state[key] = _SeriesState(ewma=float(value), residuals=deque(maxlen=self.window))
+            self.state[key] = _SeriesState(ewma=float(value), residuals=deque(maxlen=self.window), warm=[value])
+            return None
+        if st.n < self.warmup:
+            # échauffement : niveau = médiane des premières valeurs (la première minute est souvent
+            # incomplète), échelle = MAD de ces mêmes valeurs. Pas d'écrêtage ici : sinon une
+            # référence partie trop bas mettrait des dizaines de minutes à rejoindre la série.
+            st.warm.append(value)
+            st.n += 1
+            st.ewma = statistics.median(st.warm)
+            if st.n == self.warmup:
+                st.residuals.extend(v - st.ewma for v in st.warm)
+                st.warm = []
             return None
         resid = value - st.ewma
         scale = self.scale(st)
         z = resid / scale
         alert = None
-        if st.n >= self.warmup:
-            anomalous = (
-                context_ok
-                and z >= self.z_threshold
-                and value >= self.min_value
-                and value >= self.min_ratio * max(st.ewma, 1.0)
-            )
-            if anomalous and not st.in_alert:
-                st.in_alert = True
-                alert = Alert("wiki_spike", key, window_start, window_end, value, round(st.ewma, 2), round(z, 2))
-            elif st.in_alert and z < self.z_threshold / 2:
-                st.in_alert = False
+        anomalous = (
+            context_ok
+            and z >= self.z_threshold
+            and value >= self.min_value
+            and value >= self.min_ratio * max(st.ewma, 1.0)
+        )
+        if anomalous and not st.in_alert:
+            st.in_alert = True
+            alert = Alert("wiki_spike", key, window_start, window_end, value, round(st.ewma, 2), round(z, 2))
+        elif st.in_alert and z < self.z_threshold / 2:
+            st.in_alert = False
         # mise à jour robuste : le résidu est écrêté à +/- clip * échelle
         clipped = max(-self.clip * scale, min(self.clip * scale, resid))
         st.residuals.append(clipped)
@@ -196,3 +209,12 @@ def label_page(stats: dict[str, Any]) -> str:
     if stats.get("top_user_share", 0) >= 0.7:
         return "rafale d'un contributeur principal"
     return "rafale de modifications"
+
+
+def label_wiki(details: dict[str, Any]) -> str:
+    """Quand trois comptes font plus de la moitié d'un pic, ce sont presque toujours des outils de
+    modification en lot (QuickStatements, Cat-a-lot...) lancés depuis des comptes humains."""
+    share = details.get("top3_users_share", 0.0)
+    if share >= 0.5:
+        return f"lot semi-automatique probable (3 comptes = {share:.0%} des modifications humaines)".replace("%", "\u202f%")
+    return "pic d'activité humaine sur le wiki"
