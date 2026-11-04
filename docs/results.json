@@ -1,0 +1,448 @@
+{
+ "events": 117846,
+ "distinct_ids": 117846,
+ "duplicates_in_lake": 0,
+ "wikis": 218,
+ "recv_span_s": 1918.6549999713898,
+ "start_utc": "2026-11-04T11:45:49+00:00",
+ "end_utc": "2026-11-04T12:17:47+00:00",
+ "by_type": {
+  "categorize": 75678,
+  "edit": 27092,
+  "new": 12078,
+  "log": 2998
+ },
+ "edits": 39170,
+ "bot_share_edits": 0.4954,
+ "bytes_added": 29924055,
+ "bytes_removed": 3877427,
+ "new_pages": 12078,
+ "throughput": {
+  "mean_per_s": 61.41,
+  "peak_1s": 1723,
+  "peak_10s_avg": 231.0,
+  "p50_per_s": 61
+ },
+ "lake_latency_s": {
+  "source_to_recv": [
+   0.356,
+   0.648,
+   10.545
+  ],
+  "source_to_write": [
+   1.091,
+   1.644,
+   10.821
+  ],
+  "edit_to_recv": [
+   2.641,
+   3.58,
+   16.445,
+   28.748
+  ],
+  "share_edit_to_recv_over_10s": 0.01597
+ },
+ "processor_latency_s": {
+  "source_to_recv": {
+   "n": 117846,
+   "p50": 0.356,
+   "p90": 0.648,
+   "p99": 10.545,
+   "max": 25.723
+  },
+  "end_to_end": {
+   "n": 117846,
+   "p50": 1.103,
+   "p90": 1.657,
+   "p99": 10.926,
+   "max": 26.995
+  },
+  "recv_to_commit": {
+   "n": 117846,
+   "p50": 0.688,
+   "p90": 1.178,
+   "p99": 1.317,
+   "max": 2.002
+  }
+ },
+ "processor_throughput": {
+  "total": 117848,
+  "span_s": 1919,
+  "mean_per_s": 61.41,
+  "peak_1s": 1627,
+  "peak_10s_avg": 230.1,
+  "p50_per_s": 61.0,
+  "p99_per_s": 120.63999999999987
+ },
+ "late_events_wiki_1m": 61,
+ "late_window_drops": {
+  "wiki_1m": 61,
+  "wiki_5m": 61,
+  "page_10m": 10,
+  "top_pages_1h": 1
+ },
+ "watermark": {
+  "max_out_of_orderness_s": 10.0,
+  "allowed_lateness_s": 0.0,
+  "max_watermark_lag_s": 16.27
+ },
+ "lateness_s": {
+  "n": 61,
+  "p50": 15.0,
+  "max": 90.0
+ },
+ "top_wikis": [
+  {
+   "wiki": "zhwiktionary",
+   "edits": 9582,
+   "edits_per_min": 299.6,
+   "bot_share": 1.0,
+   "new_pages": 9542,
+   "bytes_added": 595278,
+   "bytes_removed": 0
+  },
+  {
+   "wiki": "wikidatawiki",
+   "edits": 8949,
+   "edits_per_min": 279.9,
+   "bot_share": 0.046,
+   "new_pages": 1172,
+   "bytes_added": 4839412,
+   "bytes_removed": 1259742
+  },
+  {
+   "wiki": "commonswiki",
+   "edits": 5530,
+   "edits_per_min": 172.9,
+   "bot_share": 0.654,
+   "new_pages": 79,
+   "bytes_added": 8652684,
+   "bytes_removed": 128422
+  },
+  {
+   "wiki": "enwiki",
+   "edits": 2307,
+   "edits_per_min": 72.1,
+   "bot_share": 0.092,
+   "new_pages": 129,
+   "bytes_added": 1091029,
+   "bytes_removed": 148131
+  },
+  {
+   "wiki": "cewiki",
+   "edits": 1638,
+   "edits_per_min": 51.2,
+   "bot_share": 0.999,
+   "new_pages": 0,
+   "bytes_added": 502,
+   "bytes_removed": 85033
+  },
+  {
+   "wiki": "kaawiki",
+   "edits": 939,
+   "edits_per_min": 29.4,
+   "bot_share": 0.997,
+   "new_pages": 0,
+   "bytes_added": 44928,
+   "bytes_removed": 0
+  },
+  {
+   "wiki": "frwiki",
+   "edits": 697,
+   "edits_per_min": 21.8,
+   "bot_share": 0.273,
+   "new_pages": 22,
+   "bytes_added": 131788,
+   "bytes_removed": 44614
+  },
+  {
+   "wiki": "dewiki",
+   "edits": 614,
+   "edits_per_min": 19.2,
+   "bot_share": 0.081,
+   "new_pages": 13,
+   "bytes_added": 104411,
+   "bytes_removed": 134690
+  },
+  {
+   "wiki": "swwiki",
+   "edits": 558,
+   "edits_per_min": 17.4,
+   "bot_share": 0.002,
+   "new_pages": 4,
+   "bytes_added": 2028539,
+   "bytes_removed": 87160
+  },
+  {
+   "wiki": "zhwiki",
+   "edits": 522,
+   "edits_per_min": 16.3,
+   "bot_share": 0.119,
+   "new_pages": 16,
+   "bytes_added": 140039,
+   "bytes_removed": 349018
+  },
+  {
+   "wiki": "tswiki",
+   "edits": 457,
+   "edits_per_min": 14.3,
+   "bot_share": 0.0,
+   "new_pages": 0,
+   "bytes_added": 2631927,
+   "bytes_removed": 84107
+  },
+  {
+   "wiki": "ruwiki",
+   "edits": 389,
+   "edits_per_min": 12.2,
+   "bot_share": 0.026,
+   "new_pages": 29,
+   "bytes_added": 225733,
+   "bytes_removed": 56462
+  },
+  {
+   "wiki": "itwiki",
+   "edits": 380,
+   "edits_per_min": 11.9,
+   "bot_share": 0.3,
+   "new_pages": 31,
+   "bytes_added": 188578,
+   "bytes_removed": 10801
+  },
+  {
+   "wiki": "trwiki",
+   "edits": 332,
+   "edits_per_min": 10.4,
+   "bot_share": 0.822,
+   "new_pages": 245,
+   "bytes_added": 71582,
+   "bytes_removed": 2839
+  },
+  {
+   "wiki": "jawiki",
+   "edits": 319,
+   "edits_per_min": 10.0,
+   "bot_share": 0.166,
+   "new_pages": 7,
+   "bytes_added": 118573,
+   "bytes_removed": 10043
+  }
+ ],
+ "sketch": {
+  "n_edits": 39170,
+  "space_saving_k": 2000,
+  "space_saving_bound": 19.59,
+  "cms_width": 5437,
+  "cms_depth": 5,
+  "cms_bound": 19.58,
+  "cms_memory_kib": 212,
+  "max_cms_error_top20": 6,
+  "max_ss_error_top20": 18,
+  "all_bounds_hold": true,
+  "top20_threshold": 18,
+  "top20_ss_correct": 14,
+  "top20_ss_rerank_cms_correct": 20,
+  "distinct_pages": 32755,
+  "comparison": [
+   {
+    "page": "wikidatawiki:Lexeme:L1484541",
+    "ss_count": 98,
+    "ss_error": 10,
+    "cms_estimate": 91,
+    "exact": 88,
+    "ss_ok": true,
+    "cms_ok": true
+   },
+   {
+    "page": "labswiki:Server Admin Log",
+    "ss_count": 63,
+    "ss_error": 3,
+    "cms_estimate": 68,
+    "exact": 62,
+    "ss_ok": true,
+    "cms_ok": true
+   },
+   {
+    "page": "wikidatawiki:Q125738",
+    "ss_count": 56,
+    "ss_error": 1,
+    "cms_estimate": 59,
+    "exact": 55,
+    "ss_ok": true,
+    "cms_ok": true
+   },
+   {
+    "page": "commonswiki:File:Riboflavin penicillinamide.jpg",
+    "ss_count": 54,
+    "ss_error": 3,
+    "cms_estimate": 52,
+    "exact": 51,
+    "ss_ok": true,
+    "cms_ok": true
+   },
+   {
+    "page": "wikidatawiki:Q141996928",
+    "ss_count": 49,
+    "ss_error": 0,
+    "cms_estimate": 53,
+    "exact": 49,
+    "ss_ok": true,
+    "cms_ok": true
+   },
+   {
+    "page": "wikidatawiki:Q106289447",
+    "ss_count": 47,
+    "ss_error": 1,
+    "cms_estimate": 51,
+    "exact": 46,
+    "ss_ok": true,
+    "cms_ok": true
+   },
+   {
+    "page": "wikidatawiki:Lexeme:L1545731",
+    "ss_count": 38,
+    "ss_error": 17,
+    "cms_estimate": 24,
+    "exact": 21,
+    "ss_ok": true,
+    "cms_ok": true
+   },
+   {
+    "page": "wikidatawiki:Q29025524",
+    "ss_count": 35,
+    "ss_error": 18,
+    "cms_estimate": 21,
+    "exact": 17,
+    "ss_ok": true,
+    "cms_ok": true
+   },
+   {
+    "page": "wikidatawiki:Q141997603",
+    "ss_count": 35,
+    "ss_error": 18,
+    "cms_estimate": 23,
+    "exact": 18,
+    "ss_ok": true,
+    "cms_ok": true
+   },
+   {
+    "page": "wikidatawiki:Q20830500",
+    "ss_count": 31,
+    "ss_error": 3,
+    "cms_estimate": 29,
+    "exact": 28,
+    "ss_ok": true,
+    "cms_ok": true
+   },
+   {
+    "page": "wikidatawiki:Q111447012",
+    "ss_count": 31,
+    "ss_error": 13,
+    "cms_estimate": 23,
+    "exact": 18,
+    "ss_ok": true,
+    "cms_ok": true
+   },
+   {
+    "page": "wikidatawiki:Q3117560",
+    "ss_count": 31,
+    "ss_error": 14,
+    "cms_estimate": 20,
+    "exact": 18,
+    "ss_ok": true,
+    "cms_ok": true
+   },
+   {
+    "page": "wikidatawiki:Q141997218",
+    "ss_count": 30,
+    "ss_error": 12,
+    "cms_estimate": 19,
+    "exact": 18,
+    "ss_ok": true,
+    "cms_ok": true
+   },
+   {
+    "page": "wikidatawiki:Q3358290",
+    "ss_count": 30,
+    "ss_error": 18,
+    "cms_estimate": 14,
+    "exact": 12,
+    "ss_ok": true,
+    "cms_ok": true
+   },
+   {
+    "page": "wikidatawiki:Q86739160",
+    "ss_count": 29,
+    "ss_error": 12,
+    "cms_estimate": 21,
+    "exact": 17,
+    "ss_ok": true,
+    "cms_ok": true
+   },
+   {
+    "page": "wikidatawiki:Q111302475",
+    "ss_count": 29,
+    "ss_error": 18,
+    "cms_estimate": 14,
+    "exact": 11,
+    "ss_ok": true,
+    "cms_ok": true
+   },
+   {
+    "page": "wikidatawiki:Q60990112",
+    "ss_count": 29,
+    "ss_error": 18,
+    "cms_estimate": 15,
+    "exact": 11,
+    "ss_ok": true,
+    "cms_ok": true
+   },
+   {
+    "page": "wikidatawiki:Q141997151",
+    "ss_count": 28,
+    "ss_error": 4,
+    "cms_estimate": 29,
+    "exact": 24,
+    "ss_ok": true,
+    "cms_ok": true
+   },
+   {
+    "page": "wikidatawiki:Q141997178",
+    "ss_count": 28,
+    "ss_error": 9,
+    "cms_estimate": 22,
+    "exact": 19,
+    "ss_ok": true,
+    "cms_ok": true
+   },
+   {
+    "page": "wikidatawiki:Q141997805",
+    "ss_count": 28,
+    "ss_error": 16,
+    "cms_estimate": 17,
+    "exact": 12,
+    "ss_ok": true,
+    "cms_ok": true
+   }
+  ]
+ },
+ "alerts": {
+  "total": 6,
+  "wiki_spike": 6,
+  "page_spike": 0,
+  "by_label": {
+   "pic d'activité humaine sur le wiki": 6
+  },
+  "detection_delay_after_window_end_s": {
+   "p50": 12.7,
+   "max": 23.3
+  }
+ },
+ "run_summary": {
+  "consumed": 117848,
+  "written": 117846,
+  "duplicates_skipped": 2,
+  "parquet_files": 1436,
+  "rss_mb": 163.2
+ }
+}

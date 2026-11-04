@@ -1,0 +1,254 @@
+[
+ {
+  "kind": "wiki_spike",
+  "key": "wikidatawiki",
+  "label": "pic d'activité humaine sur le wiki",
+  "window_start": 1793793300.0,
+  "window_end": 1793793360.0,
+  "value": 222,
+  "baseline": 126.17,
+  "score": 8.53,
+  "detected_at": 1793793372.4221246,
+  "url": null,
+  "details": {
+   "edits": 225,
+   "bot_share": 0.0133,
+   "human_users": 49,
+   "new_pages": 6,
+   "bytes_added": 44152,
+   "bytes_removed": 12034,
+   "top_pages": [
+    [
+     "Q141997152",
+     9
+    ],
+    [
+     "Q2881660",
+     8
+    ],
+    [
+     "Q48863885",
+     8
+    ],
+    [
+     "Q137573861",
+     7
+    ],
+    [
+     "Q139708049",
+     7
+    ]
+   ]
+  }
+ },
+ {
+  "kind": "wiki_spike",
+  "key": "wikidatawiki",
+  "label": "pic d'activité humaine sur le wiki",
+  "window_start": 1793793720.0,
+  "window_end": 1793793780.0,
+  "value": 510,
+  "baseline": 182.65,
+  "score": 24.22,
+  "detected_at": 1793793792.7387197,
+  "url": null,
+  "details": {
+   "edits": 554,
+   "bot_share": 0.0794,
+   "human_users": 54,
+   "new_pages": 65,
+   "bytes_added": 195736,
+   "bytes_removed": 38927,
+   "top_pages": [
+    [
+     "Q141997181",
+     18
+    ],
+    [
+     "Q28842207",
+     18
+    ],
+    [
+     "Q2883429",
+     17
+    ],
+    [
+     "Q2883441",
+     17
+    ],
+    [
+     "Q2883425",
+     16
+    ]
+   ]
+  }
+ },
+ {
+  "kind": "wiki_spike",
+  "key": "commonswiki",
+  "label": "pic d'activité humaine sur le wiki",
+  "window_start": 1793793780.0,
+  "window_end": 1793793840.0,
+  "value": 136,
+  "baseline": 38.13,
+  "score": 10.86,
+  "detected_at": 1793793852.9599392,
+  "url": null,
+  "details": {
+   "edits": 245,
+   "bot_share": 0.4449,
+   "human_users": 33,
+   "new_pages": 4,
+   "bytes_added": 238314,
+   "bytes_removed": 324,
+   "top_pages": [
+    [
+     "File:Illiparambil Family in Bicentennial Glory - Cover Page.png",
+     5
+    ],
+    [
+     "File:Spektaklo dum la 98-a UK 5.jpg",
+     5
+    ],
+    [
+     "Category:Avia petrol stations in Poland",
+     5
+    ],
+    [
+     "File:Aldred Building.jpg",
+     5
+    ],
+    [
+     "Category:Elvend Mirza",
+     5
+    ]
+   ]
+  }
+ },
+ {
+  "kind": "wiki_spike",
+  "key": "wikidatawiki",
+  "label": "pic d'activité humaine sur le wiki",
+  "window_start": 1793794020.0,
+  "window_end": 1793794080.0,
+  "value": 501,
+  "baseline": 169.3,
+  "score": 25.49,
+  "detected_at": 1793794092.1607432,
+  "url": null,
+  "details": {
+   "edits": 592,
+   "bot_share": 0.1537,
+   "human_users": 48,
+   "new_pages": 116,
+   "bytes_added": 308535,
+   "bytes_removed": 34464,
+   "top_pages": [
+    [
+     "Q289953",
+     19
+    ],
+    [
+     "Q141997260",
+     17
+    ],
+    [
+     "Q137574262",
+     17
+    ],
+    [
+     "Q137574268",
+     17
+    ],
+    [
+     "Q289704",
+     16
+    ]
+   ]
+  }
+ },
+ {
+  "kind": "wiki_spike",
+  "key": "commonswiki",
+  "label": "pic d'activité humaine sur le wiki",
+  "window_start": 1793794080.0,
+  "window_end": 1793794140.0,
+  "value": 124,
+  "baseline": 36.23,
+  "score": 6.47,
+  "detected_at": 1793794163.2650955,
+  "url": null,
+  "details": {
+   "edits": 230,
+   "bot_share": 0.4609,
+   "human_users": 25,
+   "new_pages": 1,
+   "bytes_added": 210625,
+   "bytes_removed": 677,
+   "top_pages": [
+    [
+     "File:France, Condé s-Aisne, Façade de l'Eglise - A47417.jpg",
+     5
+    ],
+    [
+     "File:Södertälje kanal och bro Parti av Södertelje Axel Eliassons Konstförlag.jpg",
+     4
+    ],
+    [
+     "Category:Occitanie photographs taken on 2015-09-16",
+     4
+    ],
+    [
+     "File:Ice crowns the towering peaks of Peru’s Cordillera Blanca (Copernicus 2026-10-25).webp",
+     4
+    ],
+    [
+     "File:Kudowa-Zdrój-tablica pamięci prof. Adolfa Duflos.jpg",
+     4
+    ]
+   ]
+  }
+ },
+ {
+  "kind": "wiki_spike",
+  "key": "commonswiki",
+  "label": "pic d'activité humaine sur le wiki",
+  "window_start": 1793794320.0,
+  "window_end": 1793794380.0,
+  "value": 125,
+  "baseline": 47.26,
+  "score": 6.01,
+  "detected_at": 1793794391.5962522,
+  "url": null,
+  "details": {
+   "edits": 234,
+   "bot_share": 0.4658,
+   "human_users": 27,
+   "new_pages": 3,
+   "bytes_added": 264932,
+   "bytes_removed": 75,
+   "top_pages": [
+    [
+     "File:The controversy between Khusraw and Farhād (folio 67r, ruler detail). Khamsah of Nizami, 1484, Shiraz (Strasbourg, Bibliothèque nationale et universitaire, MS 4715).jpg",
+     5
+    ],
+    [
+     "File:Goethe-Gymnasium Stolberg 2025-06-07-13.jpg",
+     4
+    ],
+    [
+     "File:Goethe-Gymnasium Stolberg 2025-06-07-11.jpg",
+     4
+    ],
+    [
+     "File:Goethe-Gymnasium Stolberg 2025-06-07-12.jpg",
+     4
+    ],
+    [
+     "Ponte Vecchio from Lungarno Anna Maria Luisa de' Medici or Lungarno degli Archibusieri",
+     4
+    ]
+   ]
+  }
+ }
+]

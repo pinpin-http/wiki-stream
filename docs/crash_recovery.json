@@ -1,0 +1,104 @@
+{
+ "coupure_1": {
+  "contexte": "Coupure électrique brutale de la machine le 2026-11-04 vers 11:10 UTC, pendant un run live (environ 28 min de capture). Ni le processus Python ni Redpanda n'ont pu s'arrêter proprement.",
+  "lac_apres_coupure": {
+   "fichiers_parquet": 1249,
+   "lisibles_en_entier": 1249,
+   "fichiers_temporaires": 0,
+   "lignes": 70965,
+   "doublons": 0,
+   "offsets_ecrits": {
+    "p0": [
+     0,
+     24031
+    ],
+    "p1": [
+     0,
+     17981
+    ],
+    "p2": [
+     0,
+     28950
+    ]
+   },
+   "trous_d_offsets": 0
+  },
+  "redpanda_apres_redemarrage": {
+   "offsets_commites": {
+    "p0": 24032,
+    "p1": 17982,
+    "p2": 28951
+   },
+   "fin_de_log": {
+    "p0": 24039,
+    "p1": 17985,
+    "p2": 28962
+   },
+   "non_lus": 21
+  },
+  "reprise_consommateur": {
+   "lus": 21,
+   "ecrits": 21,
+   "doublons_ecartes": 0
+  },
+  "reprise_producteur_last_event_id": {
+   "duree_s": 60,
+   "evenements": 14333,
+   "pic_1s": 4330,
+   "doublons_ecartes_au_sink": 272
+  },
+  "verification_finale": {
+   "messages_dans_le_topic": 85319,
+   "ids_distincts_topic": 85047,
+   "lignes_lac": 85047,
+   "ids_distincts_lac": 85047,
+   "manquants_dans_le_lac": 0,
+   "en_trop_dans_le_lac": 0
+  }
+ },
+ "coupure_2": {
+  "contexte": "Deuxième coupure brutale le 2026-11-04 vers 11:37:45 UTC, au bout d'environ 17 min d'un run live. Redpanda tournait en --mode dev-container, qui lance redpanda avec --unsafe-bypass-fsync=true.",
+  "verify_juste_apres_coupure": {
+   "fichiers_parquet": 733,
+   "illisibles": 0,
+   "temporaires": 0,
+   "offsets_max_ecrits_dans_le_lac": {
+    "0": 13044,
+    "1": 12173,
+    "2": 4210
+   },
+   "redpanda_log_end": {
+    "0": 13024,
+    "1": 12155,
+    "2": 4211
+   },
+   "redpanda_offsets_commites": {
+    "0": 13016,
+    "1": 12141,
+    "2": 4207
+   },
+   "lignes_lac": 29430,
+   "doublons_lac": 0,
+   "ids_du_topic_absents_du_lac": 0,
+   "ids_du_lac_perdus_par_redpanda": 40
+  },
+  "reprise_producteur_last_event_id": {
+   "duree_s": 60,
+   "evenements": 11267,
+   "pic_1s": 3638
+  },
+  "reprise_consommateur": {
+   "lus": 11293,
+   "ecrits": 11180,
+   "doublons_ecartes": 113
+  },
+  "verify_final": {
+   "topic_messages": 40657,
+   "topic_distinct_ids": 40610,
+   "lake_rows": 40610,
+   "lake_duplicates": 0,
+   "missing_in_lake": 0,
+   "extra_in_lake": 0
+  }
+ }
+}

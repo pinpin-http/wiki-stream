@@ -1,0 +1,15 @@
+run 2026-11-04T11:45:49+00:00 → 2026-11-04T12:17:47+00:00 (32.0 min)
+événements dans le lac : 117846 (ids distincts 117846, doublons 0)
+débit : moyenne 61.41 évt/s, pic 1 s 1723, pic 10 s 231.0
+latence source_to_recv : p50 0.356 s, p90 0.648 s, p99 10.545 s, max 25.723 s
+latence end_to_end : p50 1.103 s, p90 1.657 s, p99 10.926 s, max 26.995 s
+latence recv_to_commit : p50 0.688 s, p90 1.178 s, p99 1.317 s, max 2.002 s
+événements en retard (wiki_1m) : 61
+alertes : 6 (6 wiki, 0 page)
+  - 12:08 wiki_spike wikidatawiki : 501 (réf 169.3) pic d'activité humaine sur le wiki
+  - 12:03 wiki_spike wikidatawiki : 510 (réf 182.65) pic d'activité humaine sur le wiki
+  - 12:04 wiki_spike commonswiki : 136 (réf 38.13) pic d'activité humaine sur le wiki
+  - 11:56 wiki_spike wikidatawiki : 222 (réf 126.17) pic d'activité humaine sur le wiki
+  - 12:09 wiki_spike commonswiki : 124 (réf 36.23) pic d'activité humaine sur le wiki
+  - 12:13 wiki_spike commonswiki : 125 (réf 47.26) pic d'activité humaine sur le wiki
+sketch : bornes respectées True, erreur max CMS top20 6 (borne 19.58), top 20 correct 14/20 (Space-Saving), 20/20 (reclassé par CMS)

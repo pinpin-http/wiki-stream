@@ -1,0 +1,387 @@
+[
+ {
+  "kind": "wiki_spike",
+  "key": "wikidatawiki",
+  "label": "lot semi-automatique probable (3 comptes = 51 % des modifications humaines)",
+  "window_start": 1793793720.0,
+  "window_end": 1793793780.0,
+  "value": 510,
+  "baseline": 209.05,
+  "score": 8.83,
+  "details": {
+   "edits": 554,
+   "bot_share": 0.0794,
+   "human_users": 54,
+   "new_pages": 65,
+   "bytes_added": 195736,
+   "bytes_removed": 38927,
+   "top_pages": [
+    [
+     "Q141997181",
+     18
+    ],
+    [
+     "Q28842207",
+     18
+    ],
+    [
+     "Q2883429",
+     17
+    ],
+    [
+     "Q2883441",
+     17
+    ],
+    [
+     "Q2883425",
+     16
+    ]
+   ],
+   "top_users": [
+    [
+     "MattArtzAnthro",
+     90
+    ],
+    [
+     "Aue Nai",
+     89
+    ],
+    [
+     "Porrima",
+     79
+    ]
+   ],
+   "top3_users_share": 0.506
+  }
+ },
+ {
+  "kind": "wiki_spike",
+  "key": "zhwiki",
+  "label": "lot semi-automatique probable (3 comptes = 79 % des modifications humaines)",
+  "window_start": 1793793720.0,
+  "window_end": 1793793780.0,
+  "value": 33,
+  "baseline": 11.49,
+  "score": 6.34,
+  "details": {
+   "edits": 34,
+   "bot_share": 0.0294,
+   "human_users": 10,
+   "new_pages": 0,
+   "bytes_added": 2590,
+   "bytes_removed": 861,
+   "top_pages": [
+    [
+     "馬爾桑",
+     2
+    ],
+    [
+     "海滕里德",
+     1
+    ],
+    [
+     "滕特林根",
+     1
+    ],
+    [
+     "WikiProject:中国文化遗产/专题奖/存档/2026年10月",
+     1
+    ],
+    [
+     "瓦隆 (弗里堡州)",
+     1
+    ]
+   ],
+   "top_users": [
+    [
+     "Htmlzycq",
+     23
+    ],
+    [
+     "FradonStar",
+     2
+    ],
+    [
+     "X20260413009",
+     1
+    ]
+   ],
+   "top3_users_share": 0.788
+  }
+ },
+ {
+  "kind": "wiki_spike",
+  "key": "commonswiki",
+  "label": "lot semi-automatique probable (3 comptes = 71 % des modifications humaines)",
+  "window_start": 1793793780.0,
+  "window_end": 1793793840.0,
+  "value": 136,
+  "baseline": 38.6,
+  "score": 11.58,
+  "details": {
+   "edits": 245,
+   "bot_share": 0.4449,
+   "human_users": 33,
+   "new_pages": 4,
+   "bytes_added": 238314,
+   "bytes_removed": 324,
+   "top_pages": [
+    [
+     "File:Illiparambil Family in Bicentennial Glory - Cover Page.png",
+     5
+    ],
+    [
+     "File:Spektaklo dum la 98-a UK 5.jpg",
+     5
+    ],
+    [
+     "Category:Avia petrol stations in Poland",
+     5
+    ],
+    [
+     "File:Aldred Building.jpg",
+     5
+    ],
+    [
+     "Category:Elvend Mirza",
+     5
+    ]
+   ],
+   "top_users": [
+    [
+     "Kontributor 2K",
+     88
+    ],
+    [
+     "Rc1959",
+     5
+    ],
+    [
+     "Pataliputra!",
+     3
+    ]
+   ],
+   "top3_users_share": 0.706
+  }
+ },
+ {
+  "kind": "wiki_spike",
+  "key": "wikidatawiki",
+  "label": "pic d'activité humaine sur le wiki",
+  "window_start": 1793794020.0,
+  "window_end": 1793794080.0,
+  "value": 501,
+  "baseline": 179.04,
+  "score": 8.69,
+  "details": {
+   "edits": 593,
+   "bot_share": 0.1551,
+   "human_users": 48,
+   "new_pages": 116,
+   "bytes_added": 308535,
+   "bytes_removed": 83842,
+   "top_pages": [
+    [
+     "Q289953",
+     19
+    ],
+    [
+     "Q141997260",
+     17
+    ],
+    [
+     "Q137574262",
+     17
+    ],
+    [
+     "Q137574268",
+     17
+    ],
+    [
+     "Q289704",
+     16
+    ]
+   ],
+   "top_users": [
+    [
+     "Aue Nai",
+     90
+    ],
+    [
+     "MattArtzAnthro",
+     88
+    ],
+    [
+     "Porrima",
+     69
+    ]
+   ],
+   "top3_users_share": 0.493
+  }
+ },
+ {
+  "kind": "wiki_spike",
+  "key": "commonswiki",
+  "label": "lot semi-automatique probable (3 comptes = 72 % des modifications humaines)",
+  "window_start": 1793794080.0,
+  "window_end": 1793794140.0,
+  "value": 124,
+  "baseline": 36.21,
+  "score": 11.98,
+  "details": {
+   "edits": 230,
+   "bot_share": 0.4609,
+   "human_users": 25,
+   "new_pages": 1,
+   "bytes_added": 210625,
+   "bytes_removed": 677,
+   "top_pages": [
+    [
+     "File:France, Condé s-Aisne, Façade de l'Eglise - A47417.jpg",
+     5
+    ],
+    [
+     "File:Södertälje kanal och bro Parti av Södertelje Axel Eliassons Konstförlag.jpg",
+     4
+    ],
+    [
+     "Category:Occitanie photographs taken on 2015-09-16",
+     4
+    ],
+    [
+     "File:Ice crowns the towering peaks of Peru’s Cordillera Blanca (Copernicus 2026-10-25).webp",
+     4
+    ],
+    [
+     "File:Kudowa-Zdrój-tablica pamięci prof. Adolfa Duflos.jpg",
+     4
+    ]
+   ],
+   "top_users": [
+    [
+     "Kontributor 2K",
+     77
+    ],
+    [
+     "Patasaki",
+     8
+    ],
+    [
+     "Rc1959",
+     4
+    ]
+   ],
+   "top3_users_share": 0.718
+  }
+ },
+ {
+  "kind": "wiki_spike",
+  "key": "commonswiki",
+  "label": "lot semi-automatique probable (3 comptes = 62 % des modifications humaines)",
+  "window_start": 1793794320.0,
+  "window_end": 1793794380.0,
+  "value": 125,
+  "baseline": 45.33,
+  "score": 8.14,
+  "details": {
+   "edits": 234,
+   "bot_share": 0.4658,
+   "human_users": 27,
+   "new_pages": 3,
+   "bytes_added": 264932,
+   "bytes_removed": 75,
+   "top_pages": [
+    [
+     "File:The controversy between Khusraw and Farhād (folio 67r, ruler detail). Khamsah of Nizami, 1484, Shiraz (Strasbourg, Bibliothèque nationale et universitaire, MS 4715).jpg",
+     5
+    ],
+    [
+     "File:Goethe-Gymnasium Stolberg 2025-06-07-13.jpg",
+     4
+    ],
+    [
+     "File:Goethe-Gymnasium Stolberg 2025-06-07-11.jpg",
+     4
+    ],
+    [
+     "File:Goethe-Gymnasium Stolberg 2025-06-07-12.jpg",
+     4
+    ],
+    [
+     "Ponte Vecchio from Lungarno Anna Maria Luisa de' Medici or Lungarno degli Archibusieri",
+     4
+    ]
+   ],
+   "top_users": [
+    [
+     "NDG",
+     38
+    ],
+    [
+     "PMG",
+     20
+    ],
+    [
+     "DiAuras",
+     20
+    ]
+   ],
+   "top3_users_share": 0.624
+  }
+ },
+ {
+  "kind": "wiki_spike",
+  "key": "commonswiki",
+  "label": "lot semi-automatique probable (3 comptes = 63 % des modifications humaines)",
+  "window_start": 1793794440.0,
+  "window_end": 1793794500.0,
+  "value": 133,
+  "baseline": 58.29,
+  "score": 6.34,
+  "details": {
+   "edits": 244,
+   "bot_share": 0.4549,
+   "human_users": 22,
+   "new_pages": 0,
+   "bytes_added": 286775,
+   "bytes_removed": 883,
+   "top_pages": [
+    [
+     "User talk:Fahmi Banaouas",
+     7
+    ],
+    [
+     "Category:Sufi Khalil Beg Mawsilu",
+     5
+    ],
+    [
+     "File:Dom obecnie Muzeum Przypkowskich XVII XVIII wiek 1906 1985 rok Jędrzejów plac Tadeusza Kościuszki 7 3.jpg",
+     5
+    ],
+    [
+     "File:France, Condé s-Aisne, Ruines d'une ancienne Abbaye - A28042.jpg",
+     4
+    ],
+    [
+     "File:Fahmi Banaouas Portait 2.jpg",
+     4
+    ]
+   ],
+   "top_users": [
+    [
+     "Kontributor 2K",
+     44
+    ],
+    [
+     "PMG",
+     28
+    ],
+    [
+     "Lymantria",
+     12
+    ]
+   ],
+   "top3_users_share": 0.632
+  }
+ }
+]
