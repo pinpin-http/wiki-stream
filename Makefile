@@ -3,7 +3,7 @@ TOPIC   ?= wiki.recentchange
 DURATION ?= 2700
 BROKER  ?= kafka
 
-.PHONY: install up topic run run-offline test report down clean
+.PHONY: install up topic run run-offline test lint report down clean
 
 install:
 	uv venv --python 3.12 .venv
@@ -28,6 +28,9 @@ run-offline:
 
 test:
 	$(PY) -m pytest
+
+lint:
+	.venv/bin/ruff check src tests
 
 report:
 	MPLBACKEND=Agg $(PY) -m wikistream report

@@ -54,6 +54,8 @@ pytest==9.2.0
     # via wiki-stream (pyproject.toml)
 python-dateutil==4.0.0
     # via matplotlib
+ruff==0.14.3
+    # via wiki-stream (pyproject.toml)
 typing-extensions==4.16.0
     # via anyio
 tzdata==2026.6

@@ -6,8 +6,8 @@ import math
 import random
 
 import pytest
-
 from conftest import make_event
+
 from wikistream.aggregates import WikiStats
 from wikistream.windowing import (
     Pipeline,

@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest==9.2.0"]
+dev = ["pytest==9.2.0", "ruff==0.14.3"]
 
 [project.scripts]
 wikistream = "wikistream.cli:main"
@@ -26,6 +26,13 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.ruff]
+line-length = 130
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E9", "F", "B", "I"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

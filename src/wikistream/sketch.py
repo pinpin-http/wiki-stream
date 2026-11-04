@@ -82,7 +82,7 @@ class CountMinSketch:
     def merge(self, other: CountMinSketch) -> None:
         if (other.width, other.depth, other.seed) != (self.width, self.depth, self.seed):
             raise ValueError("sketches incompatibles")
-        for r, o in zip(self.rows, other.rows):
+        for r, o in zip(self.rows, other.rows, strict=True):
             for j in range(self.width):
                 r[j] += o[j]
         self.total += other.total

@@ -28,6 +28,9 @@ jobs:
           python -m pip install -r requirements.lock
           python -m pip install --no-deps -e .
 
+      - name: Lint
+        run: ruff check src tests
+
       - name: Tests (sans réseau, sur la fixture)
         run: python -m pytest -q
 

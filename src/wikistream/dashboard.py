@@ -343,7 +343,7 @@ class Report:
         values = [series.get(e, 0) for e in ends]
         det = RobustEWMADetector()
         base = []
-        for e, v in zip(ends, values):
+        for e, v in zip(ends, values, strict=True):
             st = det.state.get(a["key"])
             base.append(st.ewma if st else v)
             det.update(a["key"], v, e - 60, e)
