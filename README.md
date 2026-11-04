@@ -121,10 +121,10 @@ Pendant la mesure, la sonde thermique de la machine a abaissé à 25 % le plafon
 
 ### Les alertes
 
-Les 6 alertes du run portent sur Wikidata (3) et Commons (3). Trois exemples :
+Les 6 alertes du run portent sur Wikidata (3) et Commons (3). Les comptes de contributeurs ne sont pas nommés ici, et `docs/backtest_alerts.json` les remplace par des pseudonymes (« compte A », « compte B »…). Trois exemples :
 
-- wikidatawiki, minute de 12:02 UTC : 510 modifications humaines contre une référence de 183 (z = 24). 54 comptes actifs, mais trois lots QuickStatements lancés en parallèle font l'essentiel : Aue Nai crée des lexèmes (89 modifications, dont 44 créations), MattArtzAnthro corrige des éléments sur des sociétés d'anthropologie (90), Porrima ajoute la description hongroise « a Henry Draper katalógus csillaga » à des étoiles du catalogue HD (79).
-- commonswiki, minute de 12:03 UTC : 136 modifications humaines contre 38 (z = 10,9). Un seul compte, Kontributor 2K, enchaîne 88 remplacements (« Doing 1 replacements. ») avec un outil de modification en masse.
+- wikidatawiki, minute de 12:02 UTC : 510 modifications humaines contre une référence de 183 (z = 24). 54 comptes actifs, mais trois lots QuickStatements lancés en parallèle font l'essentiel : un compte crée des lexèmes (89 modifications, dont 44 créations), un deuxième corrige des éléments sur des sociétés d'anthropologie (90), un troisième ajoute la description hongroise « a Henry Draper katalógus csillaga » à des étoiles du catalogue HD (79).
+- commonswiki, minute de 12:03 UTC : 136 modifications humaines contre 38 (z = 10,9). Un seul compte enchaîne 88 remplacements (« Doing 1 replacements. ») avec un outil de modification en masse.
 - ruwiki, article « Граффити » (graffiti), vers 10:58 UTC, pendant le run interrompu par la première coupure : 6 modifications humaines en 10 minutes par 3 comptes, dont 3 révocations, étiquette « guerre d'édition probable ». Un compte temporaire ajoutait « роналдо » dans l'article ; un contributeur, puis le bot anti-vandalisme EyeBot (score ORES 0,847), ont annulé ses modifications, avant de les masquer.
 
 Dans ce run de 32 minutes, aucune page n'a déclenché d'alerte. Il faut au moins 5 modifications humaines par 2 contributeurs en 10 minutes, à une heure où l'activité humaine sur un article donné est très faible.

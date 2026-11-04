@@ -87,6 +87,16 @@ def _read_jsonl(path: Path) -> list[dict[str, Any]]:
     return out
 
 
+def _pseudonymize(obj):
+    """Remplace les noms des comptes (listes top_users) par « compte A », « compte B »… avant publication."""
+    if isinstance(obj, dict):
+        return {k: ([[f"compte {chr(65 + i)}", n] for i, (_, n) in enumerate(v)] if k == "top_users" and isinstance(v, list)
+                    else _pseudonymize(v)) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_pseudonymize(v) for v in obj]
+    return obj
+
+
 class Report:
     def __init__(self, s: Settings, docs: Path, backtest: Path | None = None) -> None:
         self.s = s
@@ -421,11 +431,11 @@ class Report:
         (self.docs / "results.json").write_text(json.dumps(self.r, ensure_ascii=False, indent=1, default=str))
         keep = [{k: a.get(k) for k in ("kind", "key", "label", "window_start", "window_end", "value", "baseline", "score",
                                          "detected_at", "url", "details")} for a in self.alerts]
-        (self.docs / "alerts.json").write_text(json.dumps(keep, ensure_ascii=False, indent=1))
+        (self.docs / "alerts.json").write_text(json.dumps(_pseudonymize(keep), ensure_ascii=False, indent=1))
         if self.backtest:
             bt = [{k: a.get(k) for k in ("kind", "key", "label", "window_start", "window_end", "value", "baseline", "score",
                                          "details")} for a in self.backtest]
-            (self.docs / "backtest_alerts.json").write_text(json.dumps(bt, ensure_ascii=False, indent=1))
+            (self.docs / "backtest_alerts.json").write_text(json.dumps(_pseudonymize(bt), ensure_ascii=False, indent=1))
 
     def write_html(self, figures: list[tuple[str, str]]) -> None:
         r = self.r
