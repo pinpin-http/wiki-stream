@@ -1,0 +1,33 @@
+[project]
+name = "wiki-stream"
+version = "0.1.0"
+description = "Pipeline de streaming temps réel sur les modifications Wikimedia : fenêtrage en temps d'événement, sketches, détection d'anomalies, sink Parquet idempotent."
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "Soheib Bouazzaoui" }]
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "confluent-kafka==2.16.1",
+    "httpx==0.28.1",
+    "pyarrow==26.0.1",
+    "duckdb==2.0.0",
+    "matplotlib==3.11.2",
+]
+
+[project.optional-dependencies]
+dev = ["pytest==9.2.0"]
+
+[project.scripts]
+wikistream = "wikistream.cli:main"
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = ["kafka: nécessite un broker Redpanda/Kafka joignable (désactivé par défaut)"]
