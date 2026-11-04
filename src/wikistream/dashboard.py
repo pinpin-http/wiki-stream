@@ -432,8 +432,8 @@ class Report:
         pl = r.get("processor_latency_s", {}).get("end_to_end", {})
         tiles = [
             ("événements traités", _fmt_int(r["events"]), f"{r['wikis']} wikis, {r['recv_span_s'] / 60:.0f} min"),
-            ("débit moyen", f"{r['throughput']['mean_per_s']:.1f} évt/s", f"pic {r['throughput']['peak_1s']} évt/s sur 1 s"),
-            ("latence p50 / p99", f"{pl.get('p50', float('nan')):.2f} / {pl.get('p99', float('nan')):.2f} s",
+            ("débit moyen", f"{_fr(r['throughput']['mean_per_s'], 1)} évt/s", f"pic {_fmt_int(r['throughput']['peak_1s'])} évt/s sur 1 s"),
+            ("latence p50 / p99", f"{_fr(pl.get('p50', float('nan')), 2)} / {_fr(pl.get('p99', float('nan')), 2)} s",
              "émission Wikimedia → commit"),
             ("alertes", str(r["alerts"]["total"]), f"{r['alerts']['wiki_spike']} wiki, {r['alerts']['page_spike']} page"),
             ("en retard", _fmt_int(r.get("late_events_wiki_1m") or 0), "hors fenêtre, comptés à part"),
@@ -449,7 +449,7 @@ class Report:
             for f, cap in figures
         )
         wiki_rows = "".join(
-            f"<tr><td>{e(t['wiki'])}</td><td>{_fmt_int(t['edits'])}</td><td>{t['edits_per_min']:.1f}</td>"
+            f"<tr><td>{e(t['wiki'])}</td><td>{_fmt_int(t['edits'])}</td><td>{_fr(t['edits_per_min'], 1)}</td>"
             f"<td>{_pct(t['bot_share'], 0)}</td><td>{_fmt_int(t['new_pages'])}</td>"
             f"<td>{_fmt_int(t['bytes_added'])}</td><td>{_fmt_int(t['bytes_removed'])}</td></tr>"
             for t in r["top_wikis"]
@@ -457,7 +457,7 @@ class Report:
         alert_rows = "".join(
             f"<tr><td>{_hhmm(a['window_end'])}</td><td>{e(a['kind'])}</td>"
             f"<td>{_link(a)}</td><td>{e(a.get('label', ''))}</td>"
-            f"<td>{a['value']:.0f}</td><td>{a['baseline']:.1f}</td><td>{a['score']:.1f}</td>"
+            f"<td>{a['value']:.0f}</td><td>{_fr(a['baseline'], 1)}</td><td>{_fr(a['score'], 1)}</td>"
             f"<td>{e(_alert_detail(a))}</td></tr>"
             for a in sorted(self.alerts, key=lambda x: x["window_end"])
         )
@@ -466,7 +466,7 @@ class Report:
             live = {(a["key"], a["window_end"]) for a in self.alerts}
             rows_bt = "".join(
                 f"<tr><td>{_hhmm(a['window_end'])}</td><td>{e(a['key'])}</td><td>{a['value']:.0f}</td>"
-                f"<td>{a['baseline']:.1f}</td><td>{a['score']:.1f}</td><td>{e(a.get('label', ''))}</td>"
+                f"<td>{_fr(a['baseline'], 1)}</td><td>{_fr(a['score'], 1)}</td><td>{e(a.get('label', ''))}</td>"
                 f"<td>{'oui' if (a['key'], a['window_end']) in live else 'non'}</td></tr>"
                 for a in sorted(self.backtest, key=lambda x: x["window_end"])
             )
@@ -486,8 +486,8 @@ class Report:
         if sk:
             sketch_intro = (
                 f"<p>{_fmt_int(sk['n_edits'])} modifications sur {_fmt_int(sk['distinct_pages'])} pages distinctes. "
-                f"Space-Saving à k = {sk['space_saving_k']} compteurs (erreur garantie ≤ N/k = {sk['space_saving_bound']:.1f}), "
-                f"Count-Min {sk['cms_width']} × {sk['cms_depth']} ({sk['cms_memory_kib']} Kio, erreur ≤ εN = {sk['cms_bound']:.1f} "
+                f"Space-Saving à k = {_fmt_int(sk['space_saving_k'])} compteurs (erreur garantie ≤ N/k = {_fr(sk['space_saving_bound'], 1)}), "
+                f"Count-Min {_fmt_int(sk['cms_width'])} × {sk['cms_depth']} ({sk['cms_memory_kib']} Kio, erreur ≤ εN = {_fr(sk['cms_bound'], 1)} "
                 f"avec probabilité ≥ 99 %). Sur le top 20 : erreur max Space-Saving {sk['max_ss_error_top20']}, "
                 f"Count-Min {sk['max_cms_error_top20']} ; bornes respectées : {'oui' if sk['all_bounds_hold'] else 'NON'}. "
                 f"Pages réellement dans le top 20 (ex æquo compris, seuil {sk['top20_threshold']} modifications) : "
@@ -600,6 +600,10 @@ def _count(items) -> dict[str, int]:
     for x in items:
         out[x] = out.get(x, 0) + 1
     return out
+
+
+def _fr(x: float, digits: int = 1) -> str:
+    return f"{x:.{digits}f}".replace(".", ",")
 
 
 def _pct(x: float, digits: int = 1) -> str:
