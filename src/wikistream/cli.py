@@ -227,6 +227,10 @@ def cmd_verify(args) -> int:
                       "enable.auto.commit": False, "broker.address.family": "v4"})
         parts = list(c.list_topics(s.topic, timeout=10).topics[s.topic].partitions)
         ends = {p: c.get_watermark_offsets(TopicPartition(s.topic, p), timeout=10)[1] for p in parts}
+        g = Consumer({"bootstrap.servers": s.bootstrap, "group.id": s.group, "broker.address.family": "v4"})
+        committed = {tp.partition: tp.offset for tp in g.committed([TopicPartition(s.topic, p) for p in parts], timeout=10)}
+        committed = {p: {"committed": o, "log_end": ends[p]} for p, o in committed.items()}
+        g.close()
         todo = {p for p in parts if ends[p] > 0}
         c.assign([TopicPartition(s.topic, p, 0) for p in parts])
         while todo:
@@ -240,13 +244,34 @@ def cmd_verify(args) -> int:
     else:
         from .broker.filelog import FileLogConsumer
 
+        committed = FileLogConsumer(s.broker_dir, s.topic, s.group, s.partitions).committed()
         c = FileLogConsumer(s.broker_dir, s.topic, f"verify-{time.time_ns()}", s.partitions)
         while batch := c.poll_batch(5000, 0):
             for r in batch:
                 ids[decode(r.value)["id"]] += 1
-    lake = duckdb.sql(f"select id from read_parquet('{lake_glob(s.lake_dir)}')").fetchnumpy()["id"].tolist()
+    # lecture complète de chaque fichier : un fichier visible doit être entier
+    import pyarrow.parquet as pq
+
+    files = sorted(s.lake_dir.glob("date=*/hour=*/part-*.parquet"))
+    unreadable = []
+    offsets: dict[int, list[int]] = collections.defaultdict(list)
+    for f in files:
+        try:
+            t = pq.read_table(f)
+        except Exception as exc:
+            unreadable.append(f"{f}: {exc}")
+            continue
+        for p, o in zip(t.column("kafka_partition").to_pylist(), t.column("kafka_offset").to_pylist(), strict=True):
+            offsets[p].append(o)
+    lake = duckdb.sql(f"select id from read_parquet('{lake_glob(s.lake_dir)}')").fetchnumpy()["id"].tolist() if files else []
     lake_set = set(lake)
     report = {
+        "parquet_files": len(files),
+        "unreadable_files": unreadable,
+        "tmp_files": len(list(s.lake_dir.glob("date=*/hour=*/.tmp-*"))),
+        "lake_offsets": {p: {"min": min(v), "max": max(v), "holes": max(v) - min(v) + 1 - len(set(v))}
+                         for p, v in sorted(offsets.items())},
+        "committed": committed,
         "topic_messages": sum(ids.values()),
         "topic_distinct_ids": len(ids),
         "lake_rows": len(lake),
@@ -255,7 +280,10 @@ def cmd_verify(args) -> int:
         "extra_in_lake": len(lake_set - set(ids)),
     }
     print(json.dumps(report, indent=1))
-    return 0 if report["lake_duplicates"] == report["missing_in_lake"] == report["extra_in_lake"] == 0 else 1
+    healthy = not unreadable and report["lake_duplicates"] == report["extra_in_lake"] == 0
+    if args.allow_unconsumed:
+        return 0 if healthy else 1  # juste après un crash : des messages peuvent rester à lire
+    return 0 if healthy and report["missing_in_lake"] == 0 else 1
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -295,7 +323,8 @@ def main(argv: list[str] | None = None) -> int:
     sp.add_argument("--file")
     sp.set_defaults(func=cmd_sql)
 
-    sp = sub.add_parser("verify", help="compare le topic et le lac : ni perte ni doublon ?")
+    sp = sub.add_parser("verify", help="intégrité du lac et comparaison avec le topic : ni perte ni doublon ?")
+    sp.add_argument("--allow-unconsumed", action="store_true", help="tolère des messages pas encore consommés (après un crash)")
     sp.set_defaults(func=cmd_verify)
 
     args = p.parse_args(argv)
