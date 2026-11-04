@@ -42,7 +42,10 @@ class FileLogProducer:
         self._errors = 0
 
     def produce(self, key: str, value: bytes) -> None:
-        p = partition_for(key, self.partitions)
+        self.produce_to(partition_for(key, self.partitions), key, value)
+
+    def produce_to(self, p: int, key: str, value: bytes) -> None:
+        """Écrit dans une partition imposée (rejeu d'un lac en gardant ses partitions d'origine)."""
         line = json.dumps({"k": key, "v": value.decode("utf-8")}, ensure_ascii=False)
         f = self._files[p]
         f.write(line.encode("utf-8") + b"\n")

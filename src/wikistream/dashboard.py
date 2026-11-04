@@ -88,8 +88,9 @@ def _read_jsonl(path: Path) -> list[dict[str, Any]]:
 
 
 class Report:
-    def __init__(self, s: Settings, docs: Path) -> None:
+    def __init__(self, s: Settings, docs: Path, backtest: Path | None = None) -> None:
         self.s = s
+        self.backtest = _read_jsonl(backtest / "out" / "alerts.jsonl") if backtest else []
         self.docs = docs
         docs.mkdir(parents=True, exist_ok=True)
         self.con = duckdb.connect()
@@ -206,7 +207,11 @@ class Report:
                 cmp.append({**t, "exact": f,
                             "ss_ok": t["ss_count"] - t["ss_error"] <= f <= t["ss_count"],
                             "cms_ok": f <= t["cms_estimate"] <= f + cms_bound})
-            exact_top20 = list(exact)[:20]
+            # top 20 exact avec ex æquo : une page est « bien classée » si son vrai compte atteint le 20e
+            counts = sorted(exact.values(), reverse=True)
+            thr = counts[19] if len(counts) >= 20 else 0
+            ss_top = [t["page"] for t in self.sketch["top"][:20]]
+            cms_top = [t["page"] for t in sorted(self.sketch["top"], key=lambda t: -t["cms_estimate"])[:20]]
             r["sketch"] = {
                 "n_edits": n_edits,
                 "space_saving_k": self.sketch["space_saving"]["k"],
@@ -218,7 +223,9 @@ class Report:
                 "max_cms_error_top20": max(c["cms_estimate"] - c["exact"] for c in cmp),
                 "max_ss_error_top20": max(c["ss_count"] - c["exact"] for c in cmp),
                 "all_bounds_hold": all(c["ss_ok"] and c["cms_ok"] for c in cmp),
-                "top20_overlap_with_exact": len({c["page"] for c in cmp} & set(exact_top20)),
+                "top20_threshold": thr,
+                "top20_ss_correct": sum(exact.get(x, 0) >= thr for x in ss_top),
+                "top20_ss_rerank_cms_correct": sum(exact.get(x, 0) >= thr for x in cms_top),
                 "distinct_pages": self.q("select count(distinct wiki || ':' || title) from rc where type in ('edit','new')")[0][0],
                 "comparison": cmp,
             }
@@ -255,6 +262,12 @@ class Report:
         imax = max(range(len(ys)), key=ys.__getitem__)
         ax.plot([xs[imax]], [ys[imax]], "o", ms=6, color=BLUE, mec=SURFACE, mew=2)
         ax.annotate(f"pic {ys[imax]:.0f}/s", (xs[imax], ys[imax]), xytext=(6, 4), textcoords="offset points", color=INK2, fontsize=9)
+        zeros = [i for i, y in enumerate(ys) if y == 0 and 0 < i < len(ys) - 1]
+        if zeros:
+            i0 = zeros[0]
+            ax.annotate("flux SSE figé ~25 s côté source,\npuis rattrapage", (xs[i0], 0), xytext=(-150, 60),
+                        textcoords="offset points", color=INK2, fontsize=9,
+                        arrowprops={"arrowstyle": "-", "color": MUTED, "lw": 1})
         ax.set_ylim(0, max(ys) * 1.18)
         ax.set_xlim(0, max(xs[-1], 1e-3))
         ax.set_xlabel(f"minutes depuis le début du run ({self.r['start_utc'][11:16]} UTC)")
@@ -274,11 +287,11 @@ class Report:
             step = max(1, n // 2000)
             xs = vals[::step] + [vals[-1]]
             ys = [i / n for i in range(0, n, step)] + [1.0]
-            ax.plot(xs, ys, color=color, lw=2, label=name)
+            p50 = vals[int(0.5 * (n - 1))]
             p99 = vals[int(0.99 * (n - 1))]
+            label = f"{name} : p50 {p50:.2f} s, p99 {p99:.2f} s".replace(".", ",")
+            ax.plot(xs, ys, color=color, lw=2, label=label)
             ax.plot([p99], [0.99], "o", ms=6, color=color, mec=SURFACE, mew=2)
-            ax.annotate(f"p99 {p99:.2f} s".replace(".", ","), (p99, 0.99), xytext=(6, -14), textcoords="offset points",
-                        color=INK2, fontsize=9)
         ax.set_xscale("log")
         ax.set_xlim(left=0.05)
         ax.set_ylim(0, 1.02)
@@ -332,34 +345,37 @@ class Report:
         wa = [a for a in self.alerts if a["kind"] == "wiki_spike"]
         if not wa:
             return None
-        a = max(wa, key=lambda x: x["score"])
-        series = defaultdict(int)
-        for r in self.wiki_1m:
-            if r["key"] == a["key"]:
-                series[r["end"]] = r["human_edits"]
-        ends_all = sorted({r["end"] for r in self.wiki_1m})
+        counts: dict[str, int] = defaultdict(int)
+        for a in wa:
+            counts[a["key"]] += 1
+        wiki = max(counts, key=lambda k: (counts[k], max(a["score"] for a in wa if a["key"] == k)))
+        series = {r["end"]: r["human_edits"] for r in self.wiki_1m if r["key"] == wiki}
         first = min(series)
-        ends = [e for e in ends_all if e >= first]
+        ends = [e for e in sorted({r["end"] for r in self.wiki_1m}) if e >= first]
         values = [series.get(e, 0) for e in ends]
         det = RobustEWMADetector()
         base = []
         for e, v in zip(ends, values, strict=True):
-            st = det.state.get(a["key"])
+            st = det.state.get(wiki)
             base.append(st.ewma if st else v)
-            det.update(a["key"], v, e - 60, e)
+            det.update(wiki, v, e - 60, e)
+        legacy = _legacy_baseline(values)
         xs = [(e - ends[0]) / 60 for e in ends]
-        fig, ax = plt.subplots(figsize=(8, 3.2))
+        fig, ax = plt.subplots(figsize=(8, 3.4))
         ax.plot(xs, values, color=BLUE, lw=2, label="modifications humaines / min")
-        ax.plot(xs, base, color=MUTED, lw=1.5, label="référence EWMA")
-        ia = ends.index(a["window_end"]) if a["window_end"] in ends else None
-        if ia is not None:
-            ax.plot([xs[ia]], [values[ia]], "o", ms=7, color=ORANGE, mec=SURFACE, mew=2)
-            ax.annotate(f"alerte : {values[ia]:.0f}/min (z = {a['score']:.1f})", (xs[ia], values[ia]),
-                        xytext=(8, 0), textcoords="offset points", color=INK, fontsize=9, va="center")
-        ax.set_ylim(0, max(values) * 1.2)
+        ax.plot(xs, legacy, color=MUTED, lw=1.5, label="référence, version du run (démarrage à froid)")
+        ax.plot(xs, base, color=ORANGE, lw=1.5, label="référence corrigée (médiane d'échauffement)")
+        for a in (a for a in wa if a["key"] == wiki):
+            if a["window_end"] in ends:
+                i = ends.index(a["window_end"])
+                ax.plot([xs[i]], [values[i]], "o", ms=7, color=BLUE, mec=SURFACE, mew=2)
+                bad = legacy[i] < 0.75 * base[i]
+                txt = f"alerte {values[i]:.0f}" + (" : faux positif" if bad else "")
+                ax.annotate(txt, (xs[i], values[i]), xytext=(6, 6), textcoords="offset points", color=INK, fontsize=9)
+        ax.set_ylim(0, max(values) * 1.5)
         ax.set_xlabel(f"minutes (fenêtres fixes d'1 min, temps d'événement, début {_hhmm(ends[0])} UTC)")
-        ax.set_title(f"Pic détecté sur {a['key']}")
-        ax.legend(loc="upper left")
+        ax.set_title(f"Alertes du run sur {wiki}")
+        ax.legend(loc="upper right", fontsize=8.5)
         return self._save(fig, "alert_wiki.png")
 
     def fig_page_alert(self) -> str | None:
@@ -406,6 +422,10 @@ class Report:
         keep = [{k: a.get(k) for k in ("kind", "key", "label", "window_start", "window_end", "value", "baseline", "score",
                                          "detected_at", "url", "details")} for a in self.alerts]
         (self.docs / "alerts.json").write_text(json.dumps(keep, ensure_ascii=False, indent=1))
+        if self.backtest:
+            bt = [{k: a.get(k) for k in ("kind", "key", "label", "window_start", "window_end", "value", "baseline", "score",
+                                         "details")} for a in self.backtest]
+            (self.docs / "backtest_alerts.json").write_text(json.dumps(bt, ensure_ascii=False, indent=1))
 
     def write_html(self, figures: list[tuple[str, str]]) -> None:
         r = self.r
@@ -441,6 +461,25 @@ class Report:
             f"<td>{e(_alert_detail(a))}</td></tr>"
             for a in sorted(self.alerts, key=lambda x: x["window_end"])
         )
+        backtest_html = ""
+        if self.backtest:
+            live = {(a["key"], a["window_end"]) for a in self.alerts}
+            rows_bt = "".join(
+                f"<tr><td>{_hhmm(a['window_end'])}</td><td>{e(a['key'])}</td><td>{a['value']:.0f}</td>"
+                f"<td>{a['baseline']:.1f}</td><td>{a['score']:.1f}</td><td>{e(a.get('label', ''))}</td>"
+                f"<td>{'oui' if (a['key'], a['window_end']) in live else 'non'}</td></tr>"
+                for a in sorted(self.backtest, key=lambda x: x["window_end"])
+            )
+            gone = [a for a in self.alerts if (a["key"], a["window_end"]) not in {(b["key"], b["window_end"]) for b in self.backtest}]
+            gone_txt = ", ".join(f"{a['key']} à {_hhmm(a['window_end'])} ({a['value']:.0f} contre {a['baseline']:.0f})" for a in gone)
+            backtest_html = (
+                f"<h2>Rejeu avec le détecteur corrigé ({len(self.backtest)} alertes)</h2>"
+                "<p>Le même lac rejoué par <code>wikistream backtest</code> avec la version corrigée du détecteur de wikis "
+                f"(échauffement par médiane). Alertes du run qui disparaissent : {e(gone_txt) or 'aucune'}.</p>"
+                "<div class=\"scroll\"><table><thead><tr><th>fin de fenêtre (UTC)</th><th>wiki</th><th>valeur</th>"
+                "<th>référence</th><th>score</th><th>étiquette</th><th>aussi en live</th></tr></thead>"
+                f"<tbody>{rows_bt}</tbody></table></div>"
+            )
         sk = r.get("sketch")
         sketch_rows = ""
         sketch_intro = ""
@@ -450,8 +489,10 @@ class Report:
                 f"Space-Saving à k = {sk['space_saving_k']} compteurs (erreur garantie ≤ N/k = {sk['space_saving_bound']:.1f}), "
                 f"Count-Min {sk['cms_width']} × {sk['cms_depth']} ({sk['cms_memory_kib']} Kio, erreur ≤ εN = {sk['cms_bound']:.1f} "
                 f"avec probabilité ≥ 99 %). Sur le top 20 : erreur max Space-Saving {sk['max_ss_error_top20']}, "
-                f"Count-Min {sk['max_cms_error_top20']} ; bornes respectées : {'oui' if sk['all_bounds_hold'] else 'NON'} ; "
-                f"{sk['top20_overlap_with_exact']}/20 pages en commun avec le top 20 exact.</p>"
+                f"Count-Min {sk['max_cms_error_top20']} ; bornes respectées : {'oui' if sk['all_bounds_hold'] else 'NON'}. "
+                f"Pages réellement dans le top 20 (ex æquo compris, seuil {sk['top20_threshold']} modifications) : "
+                f"{sk['top20_ss_correct']}/20 avec l'ordre de Space-Saving, {sk['top20_ss_rerank_cms_correct']}/20 quand ses "
+                f"candidats sont reclassés par Count-Min.</p>"
             )
             sketch_rows = "".join(
                 f"<tr><td>{e(c['page'])}</td><td>{c['exact']}</td><td>{c['ss_count']} (±{c['ss_error']})</td>"
@@ -496,6 +537,7 @@ code {{ font-size:13px; }}
 <h2>Alertes ({r['alerts']['total']})</h2>
 <div class="scroll"><table><thead><tr><th>fin de fenêtre (UTC)</th><th>type</th><th>clé</th><th>étiquette</th><th>valeur</th><th>référence</th><th>score</th><th>contexte</th></tr></thead>
 <tbody>{alert_rows or '<tr><td colspan="8">aucune</td></tr>'}</tbody></table></div>
+{backtest_html}
 <h2>Wikis les plus actifs</h2>
 <div class="scroll"><table><thead><tr><th>wiki</th><th>modifs</th><th>modifs/min</th><th>bots</th><th>nouvelles pages</th><th>octets ajoutés</th><th>octets retirés</th></tr></thead>
 <tbody>{wiki_rows}</tbody></table></div>
@@ -523,8 +565,34 @@ code {{ font-size:13px; }}
             lines.append(f"  - {_hhmm(a['window_end'])} {a['kind']} {a['key']} : {a['value']:.0f} (réf {a['baseline']}) {a.get('label', '')}")
         if r.get("sketch"):
             sk = r["sketch"]
-            lines.append(f"sketch : bornes respectées {sk['all_bounds_hold']}, erreur max CMS top20 {sk['max_cms_error_top20']} (borne {sk['cms_bound']})")
+            lines.append(f"sketch : bornes respectées {sk['all_bounds_hold']}, erreur max CMS top20 {sk['max_cms_error_top20']} (borne {sk['cms_bound']}), "
+                         f"top 20 correct {sk['top20_ss_correct']}/20 (Space-Saving), {sk['top20_ss_rerank_cms_correct']}/20 (reclassé par CMS)")
         return "\n".join(lines)
+
+
+def _legacy_baseline(values: list[float], alpha: float = 0.3, clip: float = 3.0) -> list[float]:
+    """Référence telle que la calculait la version du détecteur utilisée pendant le run (avant correctif) :
+    partie de la première valeur, résidus écrêtés dès le début."""
+    import statistics
+    from collections import deque
+
+    out: list[float] = []
+    ewma = None
+    resid: deque = deque(maxlen=30)
+    for v in values:
+        if ewma is None:
+            ewma = float(v)
+            out.append(ewma)
+            continue
+        out.append(ewma)
+        floor = max(ewma, 1.0) ** 0.5
+        if len(resid) >= 3:
+            med = statistics.median(resid)
+            floor = max(1.4826 * statistics.median(abs(r - med) for r in resid), floor)
+        r = max(-clip * floor, min(clip * floor, v - ewma))
+        resid.append(r)
+        ewma += alpha * r
+    return out
 
 
 def _count(items) -> dict[str, int]:
@@ -557,9 +625,9 @@ def _alert_detail(a: dict[str, Any]) -> str:
     return f"{d.get('human_users')} contributeurs humains ; pages : {tops}"
 
 
-def build_report(s: Settings, docs: Path) -> dict[str, Any]:
+def build_report(s: Settings, docs: Path, backtest: Path | None = None) -> dict[str, Any]:
     _style()
-    rep = Report(s, docs)
+    rep = Report(s, docs, backtest)
     rep.compute()
     figures = [
         (rep.fig_throughput(), "Débit reçu depuis EventStreams (moyenne par tranche de 10 s)."),
@@ -567,7 +635,7 @@ def build_report(s: Settings, docs: Path) -> dict[str, Any]:
         (rep.fig_delay(), "Délai entre la modification et sa réception : la queue justifie la borne du watermark."),
         (rep.fig_wikis(), "Modifications par minute sur les wikis les plus actifs."),
     ]
-    for f, cap in ((rep.fig_wiki_alert(), "Série minute d'un wiki et référence EWMA au moment de l'alerte."),
+    for f, cap in ((rep.fig_wiki_alert(), "Série minute du wiki le plus alerté, avec la référence du run et la référence corrigée."),
                    (rep.fig_page_alert(), "Modifications humaines par minute sur la page en alerte (fenêtre de 10 min en orange).")):
         if f:
             figures.append((f, cap))

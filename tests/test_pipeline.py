@@ -86,3 +86,22 @@ def test_verify_command_detects_loss(tmp_path, records, capsys):
     prod.close()
     assert main(["--broker", "file", "--data", str(tmp_path), "verify"]) == 1
     assert '"missing_in_lake": 1' in capsys.readouterr().out
+
+
+def test_backtest_replays_a_lake(tmp_path, records):
+    from wikistream.cli import main
+
+    s = Settings(data_dir=tmp_path / "live", broker="file")
+    prod = FileLogProducer(s.broker_dir, s.topic, s.partitions)
+    for r in records:
+        prod.produce(r["wiki"], encode(r))
+    prod.close()
+    proc = Processor(FileLogConsumer(s.broker_dir, s.topic, s.group), ParquetSink(s.lake_dir), s)
+    proc.run(idle_exit=0.3)
+    proc.close()
+    out = tmp_path / "rejeu"
+    assert main(["backtest", str(s.lake_dir), "--out", str(out)]) == 0
+    con = duckdb.connect()
+    n = con.sql(f"select count(*), count(distinct id) from read_parquet('{lake_glob(out / 'lake' / 'recentchange')}')").fetchall()[0]
+    assert n == (len(records), len(records))
+    assert main(["backtest", str(s.lake_dir), "--out", str(out)]) == 2  # refuse un répertoire non vide

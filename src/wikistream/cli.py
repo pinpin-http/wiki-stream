@@ -185,7 +185,7 @@ def cmd_report(args) -> int:
     from .dashboard import build_report
 
     s = _settings(args)
-    build_report(s, Path(args.docs))
+    build_report(s, Path(args.docs), Path(args.backtest) if args.backtest else None)
     return 0
 
 
@@ -286,6 +286,49 @@ def cmd_verify(args) -> int:
     return 0 if healthy and report["missing_in_lake"] == 0 else 1
 
 
+def cmd_backtest(args) -> int:
+    """Rejoue un lac Parquet dans l'ordre de réception, via le broker fichier, avec le code actuel.
+
+    Sert à comparer deux versions des détecteurs sur les mêmes données. Les instants de détection
+    (`detected_at`) n'ont pas de sens dans un rejeu : tout est traité en accéléré.
+    """
+    import duckdb
+
+    from .broker.filelog import FileLogConsumer, FileLogProducer
+    from .events import SCHEMA_VERSION, encode
+    from .processor import Processor
+    from .sink import ParquetSink, lake_glob
+
+    s = Settings(data_dir=Path(args.out), broker="file")
+    if s.data_dir.exists() and any(s.data_dir.iterdir()):
+        print(f"{s.data_dir} n'est pas vide", file=sys.stderr)
+        return 2
+    _setup_logging(s)
+    s.flush_max_records = 500
+    prod = FileLogProducer(s.broker_dir, s.topic, s.partitions)
+    cur = duckdb.connect().execute(
+        "select id, rc_id, wiki, server, type, ns, title, \"user\", bot, minor, epoch(event_time) as ts,"
+        " epoch(meta_dt) as dt, epoch(recv_time) as recv_ts, len_old, len_new, rev_old, rev_new, log_type, comment,"
+        f" kafka_partition from read_parquet('{lake_glob(Path(args.lake))}')"
+        " order by recv_time, kafka_partition, kafka_offset"
+    )
+    cols = [d[0] for d in cur.description]
+    n = 0
+    while rows := cur.fetchmany(10_000):
+        for row in rows:
+            rec = dict(zip(cols, row, strict=True))
+            part = rec.pop("kafka_partition") % s.partitions
+            rec["v"] = SCHEMA_VERSION
+            prod.produce_to(part, rec["wiki"], encode(rec))
+            n += 1
+    prod.close()
+    proc = Processor(FileLogConsumer(s.broker_dir, s.topic, s.group, s.partitions), ParquetSink(s.lake_dir), s)
+    summary = proc.run(idle_exit=2)
+    proc.close()
+    print(json.dumps({"replayed": n, "written": summary["written"], "alerts": summary["alerts"]}, indent=1))
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="wikistream", description=__doc__)
     p.add_argument("--broker", choices=["kafka", "file"], help="défaut : $WIKISTREAM_BROKER ou kafka")
@@ -316,12 +359,18 @@ def main(argv: list[str] | None = None) -> int:
 
     sp = sub.add_parser("report", help="figures PNG + tableau de bord HTML statique")
     sp.add_argument("--docs", default="docs")
+    sp.add_argument("--backtest", help="répertoire d'un `wikistream backtest`, pour comparer les alertes")
     sp.set_defaults(func=cmd_report)
 
     sp = sub.add_parser("sql", help="requêtes DuckDB sur le lac Parquet")
     sp.add_argument("query", nargs="?", default="select count(*) from rc")
     sp.add_argument("--file")
     sp.set_defaults(func=cmd_sql)
+
+    sp = sub.add_parser("backtest", help="rejoue un lac Parquet avec le code actuel (comparaison de détecteurs)")
+    sp.add_argument("lake", help="répertoire du lac source (…/lake/recentchange)")
+    sp.add_argument("--out", required=True, help="répertoire de travail vide")
+    sp.set_defaults(func=cmd_backtest)
 
     sp = sub.add_parser("verify", help="intégrité du lac et comparaison avec le topic : ni perte ni doublon ?")
     sp.add_argument("--allow-unconsumed", action="store_true", help="tolère des messages pas encore consommés (après un crash)")
