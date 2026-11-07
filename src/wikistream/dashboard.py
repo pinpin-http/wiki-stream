@@ -1,7 +1,7 @@
 """Rapport : requêtes DuckDB sur le lac Parquet, figures PNG et tableau de bord HTML statique.
 
 Tout est recalculé à partir de ce que le pipeline a écrit (lac, journaux JSONL,
-résumé de run). Rien n'est saisi à la main.
+résumé de run), sans aucune saisie à la main.
 """
 
 from __future__ import annotations

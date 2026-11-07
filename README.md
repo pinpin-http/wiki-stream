@@ -8,12 +8,12 @@ Dépôt : https://github.com/pinpin-http/wiki-stream
 
 ## Ce que fait le projet
 
-- **Source** : flux SSE `https://stream.wikimedia.org/v2/stream/recentchange`, une cinquantaine d'événements par seconde. Reconnexion automatique avec `Last-Event-ID`, User-Agent `wiki-stream/0.1 (https://github.com/pinpin-http/wiki-stream)` comme le demande la politique Wikimedia.
-- **Broker** : Redpanda en `docker compose` (un cœur, 1 Go), topic `wiki.recentchange` à 3 partitions, clé = wiki, valeur = JSON compact. Sans Docker, un broker de repli sur fichiers journalisés prend le relais avec la même interface.
-- **Traitement** : fenêtres fixes et glissantes en temps d'événement, watermark, événements en retard comptés à part, agrégats par wiki (modifications par minute, part de bots, octets ajoutés et retirés, nouvelles pages), top pages en mémoire bornée (Count-Min Sketch et Space-Saving).
-- **Détection** : pics d'activité sur un wiki (EWMA + z-score robuste) et sur une page (score de Poisson sur fenêtres glissantes de 10 minutes), journalisés dans `data/out/alerts.jsonl`.
-- **Sink** : Parquet partitionné par heure, écritures idempotentes, offsets commités après écriture. Requêtes DuckDB dans `sql/requetes.sql`.
-- **Rapport** : `make report` produit les figures de `docs/` et un tableau de bord HTML statique (`docs/dashboard.html`), sans serveur.
+- Source : flux SSE `https://stream.wikimedia.org/v2/stream/recentchange`, une cinquantaine d'événements par seconde. Reconnexion automatique avec `Last-Event-ID`, User-Agent `wiki-stream/0.1 (https://github.com/pinpin-http/wiki-stream)` comme le demande la politique Wikimedia.
+- Broker : Redpanda en `docker compose` (un cœur, 1 Go), topic `wiki.recentchange` à 3 partitions, clé = wiki, valeur = JSON compact. Sans Docker, un broker de repli sur fichiers journalisés prend le relais avec la même interface.
+- Traitement : fenêtres fixes et glissantes en temps d'événement, watermark, événements en retard comptés à part, agrégats par wiki (modifications par minute, part de bots, octets ajoutés et retirés, nouvelles pages), top pages en mémoire bornée (Count-Min Sketch et Space-Saving).
+- Détection : pics d'activité sur un wiki (EWMA + z-score robuste) et sur une page (score de Poisson sur fenêtres glissantes de 10 minutes), journalisés dans `data/out/alerts.jsonl`.
+- Sink : Parquet partitionné par heure, écritures idempotentes, offsets commités après écriture. Requêtes DuckDB dans `sql/requetes.sql`.
+- Rapport : `make report` produit les figures de `docs/` et un tableau de bord HTML statique (`docs/dashboard.html`), sans serveur.
 
 ## Architecture
 
@@ -129,7 +129,7 @@ Les 6 alertes du run portent sur Wikidata (3) et Commons (3). Les comptes de con
 
 Dans ce run de 32 minutes, aucune page n'a déclenché d'alerte. Il faut au moins 5 modifications humaines par 2 contributeurs en 10 minutes, à une heure où l'activité humaine sur un article donné est très faible.
 
-Le bilan des alertes de wiki est mitigé, et la figure ci-dessous montre pourquoi. La première alerte du run (wikidatawiki, 222 contre 126 sur la minute de 11:55) était un faux positif : la référence partait de la première minute, incomplète, et l'écrêtage des résidus l'empêchait de remonter vite. Le détecteur a été corrigé après le run (échauffement par médiane et MAD), puis le même lac a été rejoué avec `wikistream backtest`. Le faux positif disparaît, les 5 autres alertes sont retrouvées sur les mêmes fenêtres, et 2 nouvelles apparaissent (zhwiki, un contributeur qui enregistre 23 fois en une minute ; Commons, encore un lot). Le rejeu étiquette 6 de ses 7 alertes « lot semi-automatique probable », car trois comptes y font plus de la moitié des modifications humaines. Autrement dit, sur ce créneau, le détecteur trouve surtout des outils de modification en masse lancés depuis des comptes sans drapeau de bot. C'est une vraie anomalie de trafic, mais pas une actualité.
+Le bilan des alertes de wiki est mitigé, et la figure ci-dessous montre pourquoi. La première alerte du run (wikidatawiki, 222 contre 126 sur la minute de 11:55) était un faux positif : la référence partait de la première minute, incomplète, et l'écrêtage des résidus l'empêchait de remonter vite. Le détecteur a été corrigé après le run (échauffement par médiane et MAD), puis le même lac a été rejoué avec `wikistream backtest`. Le faux positif disparaît, les 5 autres alertes sont retrouvées sur les mêmes fenêtres, et 2 nouvelles apparaissent (zhwiki, un contributeur qui enregistre 23 fois en une minute ; Commons, encore un lot). Le rejeu étiquette 6 de ses 7 alertes « lot semi-automatique probable », car trois comptes y font plus de la moitié des modifications humaines : sur ce créneau, le détecteur trouve surtout des outils de modification en masse lancés depuis des comptes sans drapeau de bot. C'est une vraie anomalie de trafic, mais pas une actualité.
 
 ![Alertes sur Wikidata](docs/alert_wiki.png)
 
